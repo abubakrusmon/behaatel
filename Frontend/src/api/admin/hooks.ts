@@ -11,7 +11,7 @@ import {
   getRecentPayments,
   getRevenueByMonth,
   getTopDebtors,
-} from '@/api/admin/admin'
+} from '@/api/admin'
 import { queryClient } from '@/api/queryClient'
 import type { CreatePaymentRequest, DebtorsQuery, PaymentsQuery } from '@/types/api'
 

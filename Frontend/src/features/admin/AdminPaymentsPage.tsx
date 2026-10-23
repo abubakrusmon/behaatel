@@ -3,7 +3,7 @@ import type { LegacyColumnDef as ColumnDef } from '@tanstack/react-table/legacy'
 import type { SortingState } from '@tanstack/table-core'
 import { Download, Filter, Plus, X } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
-import { exportAdminPayments } from '@/api/admin/admin'
+import { exportAdminPayments } from '@/api/admin'
 import { useAdminPayments, useCancelAdminPayment } from '@/api/admin/hooks'
 import { getErrorMessage } from '@/api/errors'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
@@ -29,8 +29,9 @@ import { PaymentDialog } from '@/features/admin/PaymentDialog'
 const paymentStatuses: PaymentStatus[] = ['completed', 'cancelled']
 const paymentMethods: PaymentMethod[] = ['cash', 'card', 'bankTransfer', 'online']
 
-function utcDateRange(date: string, end = false): string {
-  return `${date}T${end ? '23:59:59.999' : '00:00:00.000'}Z`
+function utcDateRange(date: string, end = false): string | undefined {
+  const boundary = new Date(`${date}T${end ? '23:59:59.999' : '00:00:00.000'}`)
+  return Number.isNaN(boundary.getTime()) ? undefined : boundary.toISOString()
 }
 
 function optionalAmount(value: string | null): number | undefined {

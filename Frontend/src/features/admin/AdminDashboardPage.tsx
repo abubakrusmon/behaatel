@@ -26,6 +26,7 @@ import { PageHeader } from '@/components/shared/PageHeader'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatCard } from '@/components/shared/StatCard'
 import { t } from '@/i18n/ru'
+import { useAuth } from '@/hooks/useAuth'
 import { formatDateTime, formatMoney, formatPeriod } from '@/lib/format'
 import type { BuildingOccupancyDto, MethodShareDto, RecentPaymentDto, RevenuePointDto, TopDebtorDto } from '@/types/api'
 
@@ -190,15 +191,16 @@ function OccupancyChart({ data, loading, error, retry }: {
   )
 }
 
-function TopDebtorsBlock({ data, loading, error, retry }: {
+function TopDebtorsBlock({ data, loading, error, retry, showMore }: {
   data: TopDebtorDto[] | undefined
   loading: boolean
   error: boolean
   retry: () => void
+  showMore: boolean
 }) {
   return (
     <Card className="min-w-0 p-5">
-      <div className="mb-4 flex items-center justify-between gap-3"><h2 className="font-semibold">{t('adminFinance.topDebtors')}</h2><Link className="text-sm font-medium text-primary hover:underline" to="/admin/debtors">{t('adminFinance.allDebtors')}</Link></div>
+      <div className="mb-4 flex items-center justify-between gap-3"><h2 className="font-semibold">{t('adminFinance.topDebtors')}</h2>{showMore && <Link className="text-sm font-medium text-primary hover:underline" to="/admin/debtors">{t('adminFinance.allDebtors')}</Link>}</div>
       {loading ? <BlockLoading /> : error ? <ErrorState onRetry={retry} /> : !data?.length ? (
         <EmptyState badge={false} title={t('adminFinance.noDebtors')} description={t('adminFinance.noDebtorsDescription')} />
       ) : (
@@ -215,15 +217,16 @@ function TopDebtorsBlock({ data, loading, error, retry }: {
   )
 }
 
-function RecentPaymentsBlock({ data, loading, error, retry }: {
+function RecentPaymentsBlock({ data, loading, error, retry, showMore }: {
   data: RecentPaymentDto[] | undefined
   loading: boolean
   error: boolean
   retry: () => void
+  showMore: boolean
 }) {
   return (
     <Card className="min-w-0 p-5">
-      <div className="mb-4 flex items-center justify-between gap-3"><h2 className="font-semibold">{t('adminFinance.recentPayments')}</h2><Link className="text-sm font-medium text-primary hover:underline" to="/admin/payments">{t('adminFinance.allPayments')}</Link></div>
+      <div className="mb-4 flex items-center justify-between gap-3"><h2 className="font-semibold">{t('adminFinance.recentPayments')}</h2>{showMore && <Link className="text-sm font-medium text-primary hover:underline" to="/admin/payments">{t('adminFinance.allPayments')}</Link>}</div>
       {loading ? <BlockLoading /> : error ? <ErrorState onRetry={retry} /> : !data?.length ? (
         <EmptyState badge={false} title={t('adminFinance.noPayments')} description={t('adminFinance.noPaymentsDescription')} />
       ) : (
@@ -241,6 +244,7 @@ function RecentPaymentsBlock({ data, loading, error, retry }: {
 }
 
 export function AdminDashboardPage() {
+  const { can } = useAuth()
   const [months, setMonths] = useState(6)
   const [methodPeriod, setMethodPeriod] = useState<'month' | 'year'>('month')
   const [from, to] = useMemo(() => utcPeriod(methodPeriod), [methodPeriod])
@@ -336,8 +340,8 @@ export function AdminDashboardPage() {
 
       <OccupancyChart data={occupancy.data} loading={occupancy.isPending} error={occupancy.isError} retry={() => void occupancy.refetch()} />
       <section className="grid min-w-0 gap-5 xl:grid-cols-2">
-        <TopDebtorsBlock data={debtors.data} loading={debtors.isPending} error={debtors.isError} retry={() => void debtors.refetch()} />
-        <RecentPaymentsBlock data={payments.data} loading={payments.isPending} error={payments.isError} retry={() => void payments.refetch()} />
+        <TopDebtorsBlock data={debtors.data} loading={debtors.isPending} error={debtors.isError} retry={() => void debtors.refetch()} showMore={can('paymentsView')} />
+        <RecentPaymentsBlock data={payments.data} loading={payments.isPending} error={payments.isError} retry={() => void payments.refetch()} showMore={can('paymentsView')} />
       </section>
     </div>
   )
