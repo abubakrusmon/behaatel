@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BehaAtel.Application/BehaAtel.Application.csproj" />
+    <Project Path="src/BehaAtel.Domain/BehaAtel.Domain.csproj" />
+    <Project Path="src/BehaAtel.Infrastructure/BehaAtel.Infrastructure.csproj" />
+    <Project Path="src/BehaAtel.WebApi/BehaAtel.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BehaAtel.Application.UnitTests/BehaAtel.Application.UnitTests.csproj" />
+    <Project Path="tests/BehaAtel.Domain.UnitTests/BehaAtel.Domain.UnitTests.csproj" />
+    <Project Path="tests/BehaAtel.WebApi.IntegrationTests/BehaAtel.WebApi.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,13 @@
+import { QueryClientProvider } from '@tanstack/react-query'
+import type { PropsWithChildren } from 'react'
+import { Toaster } from '@/components/ui/sonner'
+import { queryClient } from '@/api/queryClient'
+
+export function Providers({ children }: PropsWithChildren) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+      <Toaster position="top-right" richColors closeButton />
+    </QueryClientProvider>
+  )
+}
