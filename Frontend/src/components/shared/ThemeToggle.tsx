@@ -1,4 +1,5 @@
 import { Monitor, Moon, Sun } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useThemeStore, type Theme } from '@/store/themeStore'
 import { t } from '@/i18n/ru'
 
@@ -13,16 +14,14 @@ export function ThemeToggle() {
   const setTheme = useThemeStore((state) => state.setTheme)
   const Icon = themes.find((item) => item.value === theme)?.icon ?? Monitor
   return (
-    <label className="relative inline-flex items-center" aria-label={t('common.theme')}>
-      <Icon className="pointer-events-none absolute left-3 text-muted-foreground" size={16} aria-hidden="true" />
-      <select
-        aria-label={t('shared.themeOptions')}
-        className="h-10 appearance-none rounded-xl border border-border bg-card pl-9 pr-3 text-sm text-foreground"
-        value={theme}
-        onChange={(event) => setTheme(event.target.value as Theme)}
-      >
-        {themes.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-      </select>
-    </label>
+    <Select value={theme} onValueChange={(value) => setTheme(value as Theme)}>
+      <SelectTrigger className="relative w-[170px] pl-9" aria-label={t('shared.themeOptions')}>
+        <Icon className="pointer-events-none absolute left-3 text-muted-foreground" size={16} aria-hidden="true" />
+        <SelectValue placeholder={t('common.theme')} />
+      </SelectTrigger>
+      <SelectContent>
+        {themes.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
+      </SelectContent>
+    </Select>
   )
 }

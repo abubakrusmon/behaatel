@@ -9,7 +9,7 @@ import { MoneyText } from '@/components/shared/MoneyText'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { PageLoading } from '@/features/user/components'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { Select } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { t } from '@/i18n/ru'
 import { formatDate, formatPeriod } from '@/lib/format'
 import type { ChargeStatus, MyChargeDto } from '@/types/api'
@@ -59,15 +59,25 @@ export function ChargesPage() {
         </label>
         <label className="grid gap-1.5 text-sm font-medium">
           {t('user.filterStatus')}
-          <Select aria-label={t('user.filterStatus')} className="min-w-48" value={status} onChange={(event) => { setStatus(event.target.value as ChargeStatus | ''); setPage(1) }}>
-            <option value="">{t('user.allStatuses')}</option>
-            {statuses.map((item) => <option key={item} value={item}>{t(`status.${item}`)}</option>)}
+          <Select value={status || 'all'} onValueChange={(value) => { setStatus(value === 'all' ? '' : value as ChargeStatus); setPage(1) }}>
+            <SelectTrigger aria-label={t('user.filterStatus')} className="min-w-48">
+              <SelectValue placeholder={t('user.allStatuses')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('user.allStatuses')}</SelectItem>
+              {statuses.map((item) => <SelectItem key={item} value={item}>{t(`status.${item}`)}</SelectItem>)}
+            </SelectContent>
           </Select>
         </label>
         <label className="grid gap-1.5 text-sm font-medium">
           {t('common.pageSize')}
-          <Select aria-label={t('common.pageSize')} className="min-w-32" value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1) }}>
-            {[2, 5, 10, 20].map((size) => <option key={size} value={size}>{size}</option>)}
+          <Select value={String(pageSize)} onValueChange={(value) => { setPageSize(Number(value)); setPage(1) }}>
+            <SelectTrigger aria-label={t('common.pageSize')} className="min-w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[2, 5, 10, 20].map((size) => <SelectItem key={size} value={String(size)}>{size}</SelectItem>)}
+            </SelectContent>
           </Select>
         </label>
       </div>

@@ -8,7 +8,7 @@ import { MoneyText } from '@/components/shared/MoneyText'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { PageLoading } from '@/features/user/components'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { Select } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { t } from '@/i18n/ru'
 import { formatDateTime } from '@/lib/format'
 import type { MyPaymentDto } from '@/types/api'
@@ -43,7 +43,16 @@ export function PaymentsPage() {
       <div className="flex flex-col gap-3 sm:flex-row">
         <label className="grid gap-1.5 text-sm font-medium">{t('user.from')}<input aria-label={t('user.from')} className="h-10 rounded-xl border border-input bg-background px-3 text-sm" type="date" value={from} max={to || undefined} onChange={(event) => { setFrom(event.target.value); setPage(1) }} /></label>
         <label className="grid gap-1.5 text-sm font-medium">{t('user.to')}<input aria-label={t('user.to')} className="h-10 rounded-xl border border-input bg-background px-3 text-sm" type="date" value={to} min={from || undefined} onChange={(event) => { setTo(event.target.value); setPage(1) }} /></label>
-        <label className="grid gap-1.5 text-sm font-medium">{t('common.pageSize')}<Select aria-label={t('common.pageSize')} className="min-w-32" value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1) }}>{[2, 5, 10, 20].map((size) => <option key={size} value={size}>{size}</option>)}</Select></label>
+        <label className="grid gap-1.5 text-sm font-medium">{t('common.pageSize')}
+          <Select value={String(pageSize)} onValueChange={(value) => { setPageSize(Number(value)); setPage(1) }}>
+            <SelectTrigger aria-label={t('common.pageSize')} className="min-w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[2, 5, 10, 20].map((size) => <SelectItem key={size} value={String(size)}>{size}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </label>
       </div>
       {payments.data.items.length ? (
         <DataTable

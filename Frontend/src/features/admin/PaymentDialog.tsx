@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { useAdminResidents, useCreateAdminPayment } from '@/api/admin/hooks'
 import { Dialog } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { MoneyText } from '@/components/shared/MoneyText'
 import { toast } from '@/lib/toast'
@@ -59,6 +59,7 @@ export function PaymentDialog({
   const createPayment = useCreateAdminPayment()
   const {
     register,
+    control,
     handleSubmit,
     watch,
     setValue,
@@ -214,9 +215,20 @@ export function PaymentDialog({
 
         <div className="space-y-1.5">
           <label className="text-sm font-medium" htmlFor="payment-method">{t('adminFinance.method')}</label>
-          <Select id="payment-method" aria-invalid={Boolean(errors.method)} {...register('method')}>
-            {paymentMethods.map((method) => <option key={method} value={method}>{t(`paymentMethod.${method}`)}</option>)}
-          </Select>
+          <Controller
+            name="method"
+            control={control}
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger id="payment-method" aria-invalid={Boolean(errors.method)}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {paymentMethods.map((method) => <SelectItem key={method} value={method}>{t(`paymentMethod.${method}`)}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            )}
+          />
           {formError(errors.method?.message)}
         </div>
 

@@ -16,7 +16,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Select } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
 import { useAuth } from '@/hooks/useAuth'
@@ -72,15 +72,25 @@ function FilterFields({
         <label className="grid gap-1.5 text-sm font-medium">{t('adminFinance.dateTo')}<Input type="date" value={to} onChange={(event) => onFilter('to', event.target.value)} /></label>
       </div>
       <label className="grid gap-1.5 text-sm font-medium">{t('adminFinance.status')}
-        <Select value={status} onChange={(event) => onFilter('status', event.target.value)}>
-          <option value="">{t('adminFinance.allStatuses')}</option>
-          {paymentStatuses.map((value) => <option key={value} value={value}>{t(`status.${value}`)}</option>)}
+        <Select value={status || 'all'} onValueChange={(value) => onFilter('status', value === 'all' ? '' : value)}>
+          <SelectTrigger>
+            <SelectValue placeholder={t('adminFinance.allStatuses')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t('adminFinance.allStatuses')}</SelectItem>
+            {paymentStatuses.map((value) => <SelectItem key={value} value={value}>{t(`status.${value}`)}</SelectItem>)}
+          </SelectContent>
         </Select>
       </label>
       <label className="grid gap-1.5 text-sm font-medium">{t('adminFinance.method')}
-        <Select value={method} onChange={(event) => onFilter('method', event.target.value)}>
-          <option value="">{t('adminFinance.allMethods')}</option>
-          {paymentMethods.map((value) => <option key={value} value={value}>{t(`paymentMethod.${value}`)}</option>)}
+        <Select value={method || 'all'} onValueChange={(value) => onFilter('method', value === 'all' ? '' : value)}>
+          <SelectTrigger>
+            <SelectValue placeholder={t('adminFinance.allMethods')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t('adminFinance.allMethods')}</SelectItem>
+            {paymentMethods.map((value) => <SelectItem key={value} value={value}>{t(`paymentMethod.${value}`)}</SelectItem>)}
+          </SelectContent>
         </Select>
       </label>
       <div className="grid grid-cols-2 gap-3">

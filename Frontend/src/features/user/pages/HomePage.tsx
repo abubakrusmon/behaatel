@@ -21,7 +21,7 @@ import { PageHeader } from '@/components/shared/PageHeader'
 import { PageLoading, RecentPayment, AnnouncementCard, ListSectionHeading } from '@/features/user/components'
 import { StatCard } from '@/components/shared/StatCard'
 import { Card } from '@/components/ui/card'
-import { Select } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAuth } from '@/hooks/useAuth'
 import { t } from '@/i18n/ru'
 import { formatDate, formatMoney, formatPeriod } from '@/lib/format'
@@ -109,9 +109,14 @@ export function HomePage() {
         <Card className="min-w-0 p-4 sm:p-6">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-semibold">{t('user.chargedAndPaid')}</h2>
-            <Select aria-label={t('user.chargedAndPaid')} className="w-auto" value={months} onChange={(event) => setMonths(Number(event.target.value))}>
-              <option value={6}>{t('user.months6')}</option>
-              <option value={12}>{t('user.months12')}</option>
+            <Select value={String(months)} onValueChange={(value) => setMonths(Number(value))}>
+              <SelectTrigger className="h-9 w-auto min-w-28" aria-label={t('user.chargedAndPaid')}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="6">{t('user.months6')}</SelectItem>
+                <SelectItem value="12">{t('user.months12')}</SelectItem>
+              </SelectContent>
             </Select>
           </div>
           <p className="sr-only">{t('user.chartDescription').replace('{summary}', chartSummary || t('user.noChartData'))}</p>

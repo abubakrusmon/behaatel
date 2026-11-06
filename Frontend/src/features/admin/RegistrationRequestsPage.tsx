@@ -9,7 +9,7 @@ import { ErrorState } from '@/components/shared/ErrorState'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Button } from '@/components/ui/button'
-import { Select } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { t } from '@/i18n/ru'
 import { formatDateTime } from '@/lib/format'
 import type { RegistrationRequestDto } from '@/types/api'
@@ -49,8 +49,13 @@ export function RegistrationRequestsPage() {
     <div className="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-7">
       <PageHeader title={t('admin.registrationsTitle')} description={t('admin.registrationsDescription')} />
       <label className="grid max-w-xs gap-1.5 text-sm font-medium">{t('user.filterStatus')}
-        <Select aria-label={t('user.filterStatus')} value={status} onChange={(event) => { setStatus(event.target.value); setPage(1) }}>
-          {approvalStatuses.map((item) => <option key={item} value={item}>{t(`status.${item}`)}</option>)}
+        <Select value={status} onValueChange={(value) => { setStatus(value); setPage(1) }}>
+          <SelectTrigger aria-label={t('user.filterStatus')}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {approvalStatuses.map((item) => <SelectItem key={item} value={item}>{t(`status.${item}`)}</SelectItem>)}
+          </SelectContent>
         </Select>
       </label>
       {query.data.items.length ? (

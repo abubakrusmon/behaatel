@@ -17,8 +17,8 @@ import {
   useTopDebtors,
 } from '@/api/admin/hooks'
 import { Card } from '@/components/ui/card'
-import { Select } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { MoneyText } from '@/components/shared/MoneyText'
@@ -315,9 +315,14 @@ export function AdminDashboardPage() {
             <h2 className="text-lg font-semibold">{t('adminFinance.reports')}</h2>
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="sr-only">{t('adminFinance.chartPeriod')}</span>
-              <Select className="h-9 w-auto min-w-28" value={months} onChange={(event) => setMonths(Number(event.target.value))}>
-                <option value={6}>{t('adminFinance.sixMonths')}</option>
-                <option value={12}>{t('adminFinance.twelveMonths')}</option>
+              <Select value={String(months)} onValueChange={(value) => setMonths(Number(value))}>
+                <SelectTrigger className="h-9 w-auto min-w-28" aria-label={t('adminFinance.chartPeriod')}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="6">{t('adminFinance.sixMonths')}</SelectItem>
+                  <SelectItem value="12">{t('adminFinance.twelveMonths')}</SelectItem>
+                </SelectContent>
               </Select>
             </label>
           </div>
@@ -328,9 +333,14 @@ export function AdminDashboardPage() {
             <h2 className="text-lg font-semibold">{t('adminFinance.breakdown')}</h2>
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="sr-only">{t('adminFinance.chartPeriod')}</span>
-              <Select className="h-9 w-auto min-w-32" value={methodPeriod} onChange={(event) => setMethodPeriod(event.target.value as 'month' | 'year')}>
-                <option value="month">{t('adminFinance.thisMonth')}</option>
-                <option value="year">{t('adminFinance.thisYear')}</option>
+              <Select value={methodPeriod} onValueChange={(value) => setMethodPeriod(value as 'month' | 'year')}>
+                <SelectTrigger className="h-9 w-auto min-w-32" aria-label={t('adminFinance.chartPeriod')}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="month">{t('adminFinance.thisMonth')}</SelectItem>
+                  <SelectItem value="year">{t('adminFinance.thisYear')}</SelectItem>
+                </SelectContent>
               </Select>
             </label>
           </div>
