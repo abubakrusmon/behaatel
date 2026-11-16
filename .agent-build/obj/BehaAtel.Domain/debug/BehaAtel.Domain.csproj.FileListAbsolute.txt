@@ -1,0 +1,12 @@
+C:\Users\Asus\Desktop\ako behruz\.agent-build\bin\BehaAtel.Domain\debug\BehaAtel.Domain.deps.json
+C:\Users\Asus\Desktop\ako behruz\.agent-build\bin\BehaAtel.Domain\debug\BehaAtel.Domain.dll
+C:\Users\Asus\Desktop\ako behruz\.agent-build\bin\BehaAtel.Domain\debug\BehaAtel.Domain.pdb
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Domain\debug\BehaAtel.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Domain\debug\BehaAtel.Domain.AssemblyInfoInputs.cache
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Domain\debug\BehaAtel.Domain.AssemblyInfo.cs
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Domain\debug\BehaAtel.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Domain\debug\BehaAtel.Domain.sourcelink.json
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Domain\debug\BehaAtel.Domain.dll
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Domain\debug\refint\BehaAtel.Domain.dll
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Domain\debug\BehaAtel.Domain.pdb
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Domain\debug\ref\BehaAtel.Domain.dll

@@ -14,9 +14,10 @@ public sealed class VerifyLoginCodeHandler(
     IDateTimeProvider clock,
     IJwtTokenService jwt,
     ICurrentUser currentUser,
-    IAuditService audit) : IRequestHandler<VerifyLoginCodeCommand, AuthResponse>
+    IAuditService audit,
+    ITelegramAccountLinkService telegramLinkService) : IRequestHandler<VerifyLoginCodeCommand, LoginResultDto>
 {
-    public async Task<AuthResponse> Handle(VerifyLoginCodeCommand request, CancellationToken cancellationToken)
+    public async Task<LoginResultDto> Handle(VerifyLoginCodeCommand request, CancellationToken cancellationToken)
     {
         var code = await db.EmailCodes.SingleOrDefaultAsync(candidate =>
             candidate.Id == request.ChallengeId && candidate.Purpose == EmailCodePurpose.LoginTwoFactor,
@@ -33,12 +34,21 @@ public sealed class VerifyLoginCodeHandler(
             });
         }
 
+        if (user.RequiresTelegramLink)
+        {
+            var telegramLink = await telegramLinkService.CreateChallengeAsync(user, cancellationToken);
+            if (telegramLink is not null)
+                return new LoginResultDto(false, null, null, null, null, telegramLink);
+        }
+
         user.RegisterLogin();
         var refreshToken = jwt.GenerateRefreshToken(user.Id, currentUser.IpAddress);
         db.RefreshTokens.Add(refreshToken);
         await db.SaveChangesAsync(cancellationToken);
         await audit.LogAsync("Login", nameof(User), user.Id.ToString(), null, new { user.Email }, cancellationToken);
-        return new AuthResponse(jwt.GenerateAccessToken(user), refreshToken.Token, refreshToken.ExpiresAt,
-            UserInfoDto.FromUser(user));
+        return new LoginResultDto(false,
+            new AuthResponse(jwt.GenerateAccessToken(user), refreshToken.Token, refreshToken.ExpiresAt,
+                UserInfoDto.FromUser(user)),
+            null, null, null);
     }
 }

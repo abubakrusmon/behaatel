@@ -11,7 +11,8 @@ public sealed class RefreshTokenHandler(
     IApplicationDbContext dbContext,
     IJwtTokenService jwtTokenService,
     ICurrentUser currentUser,
-    IAuditService auditService)
+    IAuditService auditService,
+    ITelegramAccountLinkService telegramLinkService)
     : IRequestHandler<RefreshTokenCommand, AuthResponse>
 {
     public async Task<AuthResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
@@ -53,6 +54,10 @@ public sealed class RefreshTokenHandler(
         if (user is null || !user.IsActive || user.IsDeleted)
         {
             throw new UnauthorizedException("Токен недействителен.");
+        }
+        if (user.RequiresTelegramLink && telegramLinkService.IsConfigured)
+        {
+            throw new UnauthorizedException("Сначала завершите привязку Telegram.");
         }
 
         var replacement = jwtTokenService.GenerateRefreshToken(user.Id, currentUser.IpAddress);

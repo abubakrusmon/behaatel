@@ -5,8 +5,7 @@ namespace BehaAtel.WebApi.Middleware;
 
 public sealed class ExceptionHandlingMiddleware(
     RequestDelegate next,
-    ILogger<ExceptionHandlingMiddleware> logger,
-    IWebHostEnvironment environment)
+    ILogger<ExceptionHandlingMiddleware> logger)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -20,10 +19,6 @@ public sealed class ExceptionHandlingMiddleware(
             if (status >= StatusCodes.Status500InternalServerError)
             {
                 logger.LogError(exception, "Необработанная ошибка запроса {TraceId}.", context.TraceIdentifier);
-                if (environment.IsDevelopment())
-                {
-                    detail = exception.ToString();
-                }
             }
             else
             {

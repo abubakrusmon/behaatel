@@ -8,13 +8,14 @@ import { useAdminPayments, useCancelAdminPayment } from '@/api/admin/hooks'
 import { getErrorMessage } from '@/api/errors'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { DataTable } from '@/components/shared/DataTable'
+import { DateRangeFields } from '@/components/shared/DatePicker'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
+import { FilterBar } from '@/components/shared/FilterBar'
 import { MoneyText } from '@/components/shared/MoneyText'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet } from '@/components/ui/sheet'
@@ -67,10 +68,7 @@ function FilterFields({
         {t('adminFinance.searchPayment')}
         <Input value={search} placeholder={t('adminFinance.searchHint')} onChange={(event) => onSearch(event.target.value)} />
       </label>
-      <div className="grid grid-cols-2 gap-3">
-        <label className="grid gap-1.5 text-sm font-medium">{t('adminFinance.dateFrom')}<Input type="date" value={from} onChange={(event) => onFilter('from', event.target.value)} /></label>
-        <label className="grid gap-1.5 text-sm font-medium">{t('adminFinance.dateTo')}<Input type="date" value={to} onChange={(event) => onFilter('to', event.target.value)} /></label>
-      </div>
+      <DateRangeFields from={from} to={to} onFromChange={(value) => onFilter('from', value)} onToChange={(value) => onFilter('to', value)} fromLabel={t('adminFinance.dateFrom')} toLabel={t('adminFinance.dateTo')} />
       <label className="grid gap-1.5 text-sm font-medium">{t('adminFinance.status')}
         <Select value={status || 'all'} onValueChange={(value) => onFilter('status', value === 'all' ? '' : value)}>
           <SelectTrigger>
@@ -94,8 +92,8 @@ function FilterFields({
         </Select>
       </label>
       <div className="grid grid-cols-2 gap-3">
-        <label className="grid gap-1.5 text-sm font-medium">{t('adminFinance.amountFrom')}<Input type="number" min="0" step="0.01" value={minAmount} onChange={(event) => onFilter('minAmount', event.target.value)} /></label>
-        <label className="grid gap-1.5 text-sm font-medium">{t('adminFinance.amountTo')}<Input type="number" min="0" step="0.01" value={maxAmount} onChange={(event) => onFilter('maxAmount', event.target.value)} /></label>
+        <label className="grid min-w-0 gap-1.5 text-sm font-medium">{t('adminFinance.amountFrom')}<Input type="number" min="0" step="0.01" placeholder={t('adminFinance.amountFromPlaceholder')} value={minAmount} onChange={(event) => onFilter('minAmount', event.target.value)} /></label>
+        <label className="grid min-w-0 gap-1.5 text-sm font-medium">{t('adminFinance.amountTo')}<Input type="number" min="0" step="0.01" placeholder={t('adminFinance.amountToPlaceholder')} value={maxAmount} onChange={(event) => onFilter('maxAmount', event.target.value)} /></label>
       </div>
     </>
   )
@@ -313,16 +311,12 @@ export function AdminPaymentsPage() {
         <Button variant="ghost" size="sm" onClick={clearFilters}><X size={15} />{t('adminFinance.resetFilters')}</Button>
       </div>
       <Sheet open={filtersOpen} onOpenChange={setFiltersOpen} side="right">
-        <div className="h-full space-y-4 overflow-y-auto p-5 pt-16">
+        <div className="h-full space-y-4 overflow-y-auto p-4 pt-16">
           <h2 className="text-lg font-semibold">{t('adminFinance.filters')}</h2>
-          <FilterFields {...filterFieldsProps} />
-          <Button variant="outline" className="w-full" onClick={clearFilters}>{t('adminFinance.resetFilters')}</Button>
+          <FilterBar onReset={clearFilters}><FilterFields {...filterFieldsProps} /></FilterBar>
         </div>
       </Sheet>
-      <Card className="hidden gap-4 p-5 lg:grid lg:grid-cols-4">
-        <FilterFields {...filterFieldsProps} />
-        <div className="flex items-end"><Button variant="outline" onClick={clearFilters}>{t('adminFinance.resetFilters')}</Button></div>
-      </Card>
+      <div className="hidden lg:block"><FilterBar onReset={clearFilters}><FilterFields {...filterFieldsProps} /></FilterBar></div>
 
       {payments.isPending ? (
         <div className="h-96 animate-pulse rounded-2xl bg-muted" aria-label={t('common.loading')} />

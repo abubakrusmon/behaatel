@@ -31,6 +31,9 @@ public sealed class UpdateAnnouncementHandler(IApplicationDbContext dbContext, I
             announcement.Body,
             announcement.PublishedAt,
             author.FullName,
-            announcement.CreatedAt);
+            announcement.CreatedAt,
+            announcement.Audience,
+            announcement.BuildingId,
+            announcement.ResidentIds);
     }
 }

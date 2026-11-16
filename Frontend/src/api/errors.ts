@@ -12,6 +12,8 @@ export function getErrorMessage(error: unknown): string {
   if (status === 401) return detail || t('errors.unauthorized')
   if (status === 403) return detail || t('errors.forbidden')
   if (status === 404) return detail || t('errors.notFound')
+  if (status === 400) return validationMessage || detail || t('errors.badRequest')
+  if (status === 409) return detail || t('errors.conflict')
   if (status === 429) return t('errors.rateLimited')
   if (!axiosError.response) return t('errors.network')
   return validationMessage || detail || axiosError.response.data?.title || t('errors.generic')

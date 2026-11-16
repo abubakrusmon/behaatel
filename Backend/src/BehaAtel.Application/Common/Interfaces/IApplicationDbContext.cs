@@ -9,6 +9,7 @@ public interface IApplicationDbContext
     DbSet<AdminPermission> AdminPermissions { get; }
     DbSet<RefreshToken> RefreshTokens { get; }
     DbSet<EmailCode> EmailCodes { get; }
+    DbSet<TelegramLinkAttempt> TelegramLinkAttempts { get; }
     DbSet<Resident> Residents { get; }
     DbSet<Building> Buildings { get; }
     DbSet<Room> Rooms { get; }
@@ -17,6 +18,7 @@ public interface IApplicationDbContext
     DbSet<Payment> Payments { get; }
     DbSet<PaymentAllocation> PaymentAllocations { get; }
     DbSet<Announcement> Announcements { get; }
+    DbSet<ResidentNotification> ResidentNotifications { get; }
     DbSet<AuditLog> AuditLogs { get; }
     DbSet<Setting> Settings { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);

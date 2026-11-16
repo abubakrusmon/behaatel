@@ -12,6 +12,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<AdminPermission> AdminPermissions => Set<AdminPermission>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<EmailCode> EmailCodes => Set<EmailCode>();
+    public DbSet<TelegramLinkAttempt> TelegramLinkAttempts => Set<TelegramLinkAttempt>();
     public DbSet<Resident> Residents => Set<Resident>();
     public DbSet<Building> Buildings => Set<Building>();
     public DbSet<Room> Rooms => Set<Room>();
@@ -20,6 +21,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<PaymentAllocation> PaymentAllocations => Set<PaymentAllocation>();
     public DbSet<Announcement> Announcements => Set<Announcement>();
+    public DbSet<ResidentNotification> ResidentNotifications => Set<ResidentNotification>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<Setting> Settings => Set<Setting>();
 

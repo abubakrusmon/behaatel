@@ -16,7 +16,7 @@ function AccessPage({ code, icon, title, description }: { code: string; icon: Re
   return (
     <main className="grid min-h-screen place-items-center bg-background px-5 py-10">
       <div className="flex max-w-md flex-col items-center text-center">
-        <Logo />
+        <Logo size={64} layout="vertical" />
         <div className="mt-14 grid size-16 place-items-center rounded-2xl bg-accent text-primary">{icon}</div>
         <p className="mt-6 text-sm font-semibold tracking-[0.2em] text-primary">{code}</p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">{title}</h1>

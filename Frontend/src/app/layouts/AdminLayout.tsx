@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
-  Activity, Banknote, Building2, ChevronLeft, ClipboardList, LayoutDashboard,
+  Activity, Banknote, Bell, Building2, ChevronLeft, ClipboardList, LayoutDashboard,
   Menu, Megaphone, Settings, Shield, Users, UserRoundPlus, WalletCards, X,
 } from 'lucide-react'
 import { useLogout } from '@/api/hooks'
 import { Logo } from '@/components/shared/Logo'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
+import { UserAvatar } from '@/components/shared/UserAvatar'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { t } from '@/i18n/ru'
@@ -29,6 +30,7 @@ const items: AdminNavItem[] = [
   { path: '/admin/payments', label: 'nav.payments', icon: WalletCards, permission: 'paymentsView' },
   { path: '/admin/debtors', label: 'nav.debtors', icon: Banknote, permission: 'paymentsView' },
   { path: '/admin/announcements', label: 'nav.announcements', icon: Megaphone, permission: 'announcementsManage' },
+  { path: '/admin/notifications', label: 'nav.notifications', icon: Bell, permission: 'announcementsManage' },
   { path: '/admin/admins', label: 'nav.admins', icon: Shield, roles: ['superAdmin'] },
   { path: '/admin/audit', label: 'nav.audit', icon: Activity, roles: ['superAdmin'] },
   { path: '/admin/settings', label: 'nav.settings', icon: Settings, roles: ['superAdmin'] },
@@ -52,7 +54,7 @@ export function AdminLayout() {
   const sidebar = (mobile = false) => (
     <div className="flex h-full flex-col">
       <div className={`flex h-20 items-center ${collapsed && !mobile ? 'justify-center px-0' : 'justify-between px-5'}`}>
-        <Link to="/admin" aria-label={t('common.appName')} onClick={() => setMobileOpen(false)}><Logo showText={!collapsed || mobile} /></Link>
+        <Link to="/admin" aria-label={t('common.appName')} onClick={() => setMobileOpen(false)}><Logo size={collapsed && !mobile ? 36 : 40} showText={!collapsed || mobile} /></Link>
         {mobile && <Button variant="ghost" size="icon" aria-label={t('common.close')} onClick={() => setMobileOpen(false)}><X size={19} /></Button>}
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-4" aria-label={t('nav.dashboard')}>
@@ -71,7 +73,7 @@ export function AdminLayout() {
       </nav>
       <div className="border-t border-border p-4">
         <div className={`flex items-center gap-3 ${collapsed && !mobile ? 'justify-center' : ''}`}>
-          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-accent font-semibold text-primary">{user?.fullName.slice(0, 1).toUpperCase()}</div>
+          <UserAvatar src={user?.avatarUrl} className="size-10" />
           {(!collapsed || mobile) && <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{user?.fullName}</p><p className="text-xs text-muted-foreground">{user && t(`common.role.${user.role}`)}</p></div>}
         </div>
       </div>
@@ -93,7 +95,7 @@ export function AdminLayout() {
             <ThemeToggle />
             <details className="relative">
               <summary className="flex h-10 cursor-pointer list-none items-center gap-2 rounded-xl px-2 hover:bg-muted" aria-label={t('shared.accountMenu')}>
-                <span className="grid size-8 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">{user?.fullName.slice(0, 1).toUpperCase()}</span>
+                <UserAvatar src={user?.avatarUrl} className="size-8" iconSize={16} />
                 <span className="hidden max-w-32 truncate text-sm font-medium sm:inline">{user?.fullName}</span>
               </summary>
               <div className="absolute right-0 mt-2 w-56 rounded-xl border border-border bg-popover p-2 shadow-lg">

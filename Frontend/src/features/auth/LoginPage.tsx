@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from 'lucide-react'
@@ -7,7 +7,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { getErrorMessage } from '@/api/errors'
 import { useLogin } from '@/api/hooks'
-import { resendLoginCode, verifyLoginCode } from '@/api/auth'
+import { pollTelegramLink, resendLoginCode, verifyLoginCode } from '@/api/auth'
 import { CodeFields } from '@/features/auth/EmailAuthPages'
 import { Logo } from '@/components/shared/Logo'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { t } from '@/i18n/ru'
 import { useAuthStore } from '@/store/authStore'
-import type { Role } from '@/types/api'
+import type { LoginResultDto, Role, TelegramLinkChallengeDto } from '@/types/api'
 
 const schema = z.object({
   email: z.email(t('auth.emailRequired')),
@@ -37,6 +37,8 @@ export function LoginPage() {
   const mutation = useLogin()
   const [showPassword, setShowPassword] = useState(false)
   const [challenge, setChallenge] = useState<{ id: string; email: string } | null>(null)
+  const [telegramChallenge, setTelegramChallenge] = useState<TelegramLinkChallengeDto | null>(null)
+  const [telegramExpired, setTelegramExpired] = useState(false)
   const [code, setCode] = useState('')
   const [resendMessage, setResendMessage] = useState('')
   const [codeError, setCodeError] = useState('')
@@ -46,6 +48,46 @@ export function LoginPage() {
     resolver: zodResolver(schema),
     defaultValues: { email: '', password: '' },
   })
+
+  const acceptLoginResult = (result: LoginResultDto) => {
+    if (result.telegramLink) {
+      setTelegramChallenge(result.telegramLink)
+      setTelegramExpired(false)
+      return
+    }
+    if (result.session) {
+      navigate(result.session.user.mustChangePassword ? '/change-password' : homeForRole(result.session.user.role), { replace: true })
+    }
+  }
+
+  useEffect(() => {
+    if (!telegramChallenge || telegramExpired) return
+    let active = true
+    let timer: number | undefined
+    const poll = async () => {
+      try {
+        const result = await pollTelegramLink(telegramChallenge.attemptId, telegramChallenge.pollToken)
+        if (!active) return
+        if (result.session) {
+          useAuthStore.getState().setSession(result.session)
+          navigate(result.session.user.mustChangePassword ? '/change-password' : homeForRole(result.session.user.role), { replace: true })
+          return
+        }
+        if (result.expired) {
+          setTelegramExpired(true)
+          return
+        }
+      } catch {
+        if (!active) return
+      }
+      if (active) timer = window.setTimeout(() => void poll(), 2000)
+    }
+    void poll()
+    return () => {
+      active = false
+      if (timer !== undefined) window.clearTimeout(timer)
+    }
+  }, [telegramChallenge, telegramExpired, navigate])
 
   if (status === 'authenticated' && user) {
     return <Navigate to={user.mustChangePassword ? '/change-password' : homeForRole(user.role)} replace />
@@ -58,9 +100,7 @@ export function LoginPage() {
         setChallenge({ id: result.challengeId, email: result.maskedEmail ?? '' })
         return
       }
-      if (result.session) {
-        navigate(result.session.user.mustChangePassword ? '/change-password' : homeForRole(result.session.user.role), { replace: true })
-      }
+      acceptLoginResult(result)
     } catch {
       // Ошибка отображается ниже без вывода в консоль.
     }
@@ -72,9 +112,9 @@ export function LoginPage() {
     setCodePending(true)
     setCodeError('')
     try {
-      const session = await verifyLoginCode(challenge.id, code)
-      useAuthStore.getState().setSession(session)
-      navigate(session.user.mustChangePassword ? '/change-password' : homeForRole(session.user.role), { replace: true })
+      const result = await verifyLoginCode(challenge.id, code)
+      if (result.session) useAuthStore.getState().setSession(result.session)
+      acceptLoginResult(result)
     } catch (error) {
       setCode('')
       setCodeError(getErrorMessage(error))
@@ -100,7 +140,7 @@ export function LoginPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(129,140,248,0.62),transparent_34%),linear-gradient(135deg,#312e81_0%,#4338ca_55%,#4f46e5_100%)]" />
         <div className="absolute -bottom-40 -right-20 size-[32rem] rounded-full border border-white/10" />
         <div className="absolute -bottom-24 -right-4 size-[23rem] rounded-full border border-white/10" />
-        <div className="relative"><Logo light /></div>
+        <div className="relative"><Logo light size={72} layout="vertical" /></div>
         <div className="relative max-w-xl">
           <div className="mb-6 inline-flex size-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 backdrop-blur"><ShieldCheck size={26} /></div>
           <h1 className="text-4xl font-semibold leading-tight tracking-tight xl:text-5xl">{t('auth.loginBrandHeading')}</h1>
@@ -111,14 +151,30 @@ export function LoginPage() {
 
       <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-10">
         <div className="w-full max-w-md">
-          <div className="mb-10 lg:hidden"><Logo /></div>
+          <div className="mb-10 flex justify-center lg:hidden"><Logo size={60} layout="vertical" /></div>
           <div className="mb-8">
             <p className="text-sm font-semibold text-primary">{t('common.appDescription')}</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">{challenge ? t('auth.enterLoginCode') : t('auth.welcome')}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{challenge ? `${t('auth.verificationDescription')} ${challenge.email}` : t('auth.loginDescription')}</p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight">{telegramChallenge ? t('auth.telegramLinkTitle') : challenge ? t('auth.enterLoginCode') : t('auth.welcome')}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{telegramChallenge ? t('auth.telegramLinkDescription') : challenge ? `${t('auth.verificationDescription')} ${challenge.email}` : t('auth.loginDescription')}</p>
           </div>
           <Card className="border-0 bg-transparent shadow-none">
-            {challenge ? (
+            {telegramChallenge ? (
+              <div className="space-y-5 text-center">
+                <a
+                  href={telegramChallenge.botLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                >
+                  {t('auth.openTelegram')}
+                </a>
+                <p className="text-sm text-muted-foreground" role="status">
+                  {telegramExpired ? t('auth.telegramLinkExpired') : t('auth.telegramWaiting')}
+                </p>
+                {telegramExpired && <Button className="w-full" variant="outline" onClick={() => { setTelegramChallenge(null); setChallenge(null) }}>{t('auth.telegramRestart')}</Button>}
+                {!telegramExpired && <Button className="w-full" type="button" variant="outline" onClick={() => { setTelegramChallenge(null); setChallenge(null) }}>{t('common.cancel')}</Button>}
+              </div>
+            ) : challenge ? (
               <form onSubmit={submitCode} className="space-y-5">
                 <CodeFields value={code} onChange={setCode} />
                 {codeError && <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-950 dark:text-red-200" role="alert">{codeError}</div>}
@@ -155,7 +211,7 @@ export function LoginPage() {
               </Button>
             </form>}
           </Card>
-          {!challenge && <div className="mt-4 flex flex-wrap justify-between gap-2 text-sm">
+          {!challenge && !telegramChallenge && <div className="mt-4 flex flex-wrap justify-between gap-2 text-sm">
             <Link className="text-primary" to="/forgot-password">{t('auth.forgotPassword')}</Link>
             <span className="text-muted-foreground">{t('auth.noAccount')} <Link className="font-medium text-primary" to="/register">{t('auth.register')}</Link></span>
           </div>}

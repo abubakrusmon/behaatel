@@ -3,4 +3,4 @@ using MediatR;
 
 namespace BehaAtel.Application.Features.Auth.VerifyLoginCode;
 
-public sealed record VerifyLoginCodeCommand(Guid ChallengeId, string Code) : IRequest<AuthResponse>;
+public sealed record VerifyLoginCodeCommand(Guid ChallengeId, string Code) : IRequest<LoginResultDto>;

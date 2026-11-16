@@ -135,6 +135,7 @@ export interface UserInfoDto {
   role: Role
   permissions: Permission[]
   mustChangePassword: boolean
+  avatarUrl?: string | null
 }
 
 export interface AuthResponse {
@@ -150,6 +151,20 @@ export interface LoginResultDto {
   challengeId: string | null
   expiresAt: string | null
   maskedEmail: string | null
+  telegramLink: TelegramLinkChallengeDto | null
+}
+
+export interface TelegramLinkChallengeDto {
+  attemptId: string
+  pollToken: string
+  botLink: string
+  expiresAt: string
+}
+
+export interface TelegramLinkPollDto {
+  completed: boolean
+  expired: boolean
+  session: AuthResponse | null
 }
 
 export interface AuthActionDto {

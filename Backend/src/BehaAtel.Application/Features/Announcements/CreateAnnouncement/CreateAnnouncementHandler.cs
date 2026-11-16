@@ -1,7 +1,10 @@
 using BehaAtel.Application.Common.Exceptions;
 using BehaAtel.Application.Common.Interfaces;
+using BehaAtel.Application.Common.Models;
+using BehaAtel.Application.Common.Services;
 using BehaAtel.Application.Features.Announcements.Common;
 using BehaAtel.Domain.Entities;
+using BehaAtel.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +14,8 @@ public sealed class CreateAnnouncementHandler(
     IApplicationDbContext dbContext,
     ICurrentUser currentUser,
     IDateTimeProvider dateTimeProvider,
-    IAuditService auditService)
+    IAuditService auditService,
+    ITelegramNotifier telegramNotifier)
     : IRequestHandler<CreateAnnouncementCommand, AnnouncementDto>
 {
     public async Task<AnnouncementDto> Handle(CreateAnnouncementCommand request, CancellationToken cancellationToken)
@@ -24,7 +28,15 @@ public sealed class CreateAnnouncementHandler(
         var author = await dbContext.Users.AsNoTracking()
             .SingleOrDefaultAsync(user => user.Id == authorId && !user.IsDeleted, cancellationToken)
             ?? throw new NotFoundException(nameof(User), authorId);
-        var announcement = Announcement.Create(request.Title, request.Body, authorId);
+        if (request.AudienceKind == AnnouncementAudience.Building && request.BuildingId is { } requestedBuildingId &&
+            !await dbContext.Buildings.AsNoTracking()
+                .AnyAsync(building => building.Id == requestedBuildingId && !building.IsDeleted, cancellationToken))
+        {
+            throw new NotFoundException(nameof(Building), requestedBuildingId);
+        }
+
+        var announcement = Announcement.Create(
+            request.Title, request.Body, authorId, request.AudienceKind, request.BuildingId, request.ResidentIds);
         if (request.PublishNow)
         {
             announcement.Publish(dateTimeProvider.UtcNow);
@@ -32,6 +44,14 @@ public sealed class CreateAnnouncementHandler(
 
         dbContext.Announcements.Add(announcement);
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        var telegramStatus = (TelegramQueueStatus?)null;
+        if (request.PublishNow && request.SendTelegram)
+        {
+            telegramStatus = await AnnouncementTelegramDispatcher.DispatchAsync(
+                dbContext, telegramNotifier, announcement, author.FullName, cancellationToken);
+        }
+
         await auditService.LogAsync("CreateAnnouncement", nameof(Announcement), announcement.Id.ToString(),
             null, new { announcement.Title, announcement.Body, announcement.PublishedAt }, cancellationToken);
 
@@ -41,6 +61,10 @@ public sealed class CreateAnnouncementHandler(
             announcement.Body,
             announcement.PublishedAt,
             author.FullName,
-            announcement.CreatedAt);
+            announcement.CreatedAt,
+            announcement.Audience,
+            announcement.BuildingId,
+            announcement.ResidentIds,
+            telegramStatus);
     }
 }

@@ -1,0 +1,55 @@
+# Render Blueprint: бэкенд (.NET) + PostgreSQL + фронтенд (статический сайт)
+databases:
+  - name: behaatel-db
+    plan: free
+    databaseName: behaatel
+    user: behaatel
+
+services:
+  - type: web
+    name: behaatel-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Backend/Dockerfile
+    dockerContext: ./Backend
+    healthCheckPath: /
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__Default
+        fromDatabase:
+          name: behaatel-db
+          property: connectionString
+      - key: Database__MigrateOnStartup
+        value: "true"
+      - key: Jwt__Key
+        generateValue: true
+      - key: Telegram__Enabled
+        value: "false"
+      # Заполнить в панели Render (значения не хранятся в репозитории):
+      - key: SeedAdmin__Password
+        sync: false
+      - key: Email__User
+        sync: false
+      - key: Email__Password
+        sync: false
+      - key: Email__FromAddress
+        sync: false
+      # Адрес фронтенда, например https://behaatel-web.onrender.com (без / в конце)
+      - key: Cors__AllowedOrigins__0
+        sync: false
+
+  - type: web
+    name: behaatel-web
+    runtime: static
+    rootDir: Frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      # Адрес бэкенда + /api/v1, например https://behaatel-api.onrender.com/api/v1
+      - key: VITE_API_URL
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

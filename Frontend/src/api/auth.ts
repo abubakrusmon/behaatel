@@ -1,5 +1,5 @@
 import { apiClient } from '@/api/client'
-import type { AuthActionDto, AuthResponse, LoginResultDto, UserInfoDto } from '@/types/api'
+import type { AuthActionDto, AuthResponse, LoginResultDto, TelegramLinkPollDto, UserInfoDto } from '@/types/api'
 
 export interface LoginRequest {
   email: string
@@ -20,8 +20,13 @@ export async function login(request: LoginRequest): Promise<LoginResultDto> {
   return data
 }
 
-export async function verifyLoginCode(challengeId: string, code: string): Promise<AuthResponse> {
-  const { data } = await apiClient.post<AuthResponse>('/auth/login/verify-code', { challengeId, code })
+export async function verifyLoginCode(challengeId: string, code: string): Promise<LoginResultDto> {
+  const { data } = await apiClient.post<LoginResultDto>('/auth/login/verify-code', { challengeId, code })
+  return data
+}
+
+export async function pollTelegramLink(attemptId: string, pollToken: string): Promise<TelegramLinkPollDto> {
+  const { data } = await apiClient.post<TelegramLinkPollDto>('/auth/telegram-link/status', { attemptId, pollToken })
   return data
 }
 
@@ -80,5 +85,10 @@ export async function changePassword(request: ChangePasswordRequest): Promise<vo
 
 export async function getMe(): Promise<UserInfoDto> {
   const { data } = await apiClient.get<UserInfoDto>('/auth/me')
+  return data
+}
+
+export async function updateAvatar(avatarUrl: string | null): Promise<UserInfoDto> {
+  const { data } = await apiClient.put<UserInfoDto>('/auth/avatar', { avatarUrl })
   return data
 }

@@ -14,6 +14,9 @@ public sealed class AnnouncementConfiguration : IEntityTypeConfiguration<Announc
         builder.Property(announcement => announcement.Body).HasMaxLength(5000).IsRequired();
         builder.Property(announcement => announcement.PublishedAt).HasColumnType("timestamp with time zone");
         builder.Property(announcement => announcement.AuthorId).IsRequired();
+        builder.Property(announcement => announcement.Audience).HasConversion<string>().HasMaxLength(32).IsRequired()
+            .HasDefaultValue(Domain.Enums.AnnouncementAudience.AllResidents);
+        builder.Property(announcement => announcement.ResidentIds).HasColumnType("uuid[]").IsRequired();
         builder.Property(announcement => announcement.IsDeleted).IsRequired();
         builder.Property(announcement => announcement.DeletedAt).HasColumnType("timestamp with time zone");
         builder.HasIndex(announcement => announcement.PublishedAt);

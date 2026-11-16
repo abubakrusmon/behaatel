@@ -2,8 +2,12 @@ import { useMemo, useState } from 'react'
 import type { LegacyColumnDef as ColumnDef } from '@tanstack/react-table/legacy'
 import { useMyPayments } from '@/api/meHooks'
 import { DataTable } from '@/components/shared/DataTable'
+import { DateRangeFields } from '@/components/shared/DatePicker'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { FilterBar } from '@/components/shared/FilterBar'
 import { MoneyText } from '@/components/shared/MoneyText'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { PageLoading } from '@/features/user/components'
@@ -40,9 +44,15 @@ export function PaymentsPage() {
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-7">
       <PageHeader title={t('pages.myPayments.title')} description={t('pages.myPayments.description')} />
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <label className="grid gap-1.5 text-sm font-medium">{t('user.from')}<input aria-label={t('user.from')} className="h-10 rounded-xl border border-input bg-background px-3 text-sm" type="date" value={from} max={to || undefined} onChange={(event) => { setFrom(event.target.value); setPage(1) }} /></label>
-        <label className="grid gap-1.5 text-sm font-medium">{t('user.to')}<input aria-label={t('user.to')} className="h-10 rounded-xl border border-input bg-background px-3 text-sm" type="date" value={to} min={from || undefined} onChange={(event) => { setTo(event.target.value); setPage(1) }} /></label>
+      <FilterBar onReset={() => { setFrom(''); setTo(''); setPage(1) }}>
+        <DateRangeFields
+          from={from}
+          to={to}
+          fromLabel={t('user.from')}
+          toLabel={t('user.to')}
+          onFromChange={(value) => { setFrom(value); setPage(1) }}
+          onToChange={(value) => { setTo(value); setPage(1) }}
+        />
         <label className="grid gap-1.5 text-sm font-medium">{t('common.pageSize')}
           <Select value={String(pageSize)} onValueChange={(value) => { setPageSize(Number(value)); setPage(1) }}>
             <SelectTrigger aria-label={t('common.pageSize')} className="min-w-32">
@@ -53,16 +63,44 @@ export function PaymentsPage() {
             </SelectContent>
           </Select>
         </label>
-      </div>
+      </FilterBar>
       {payments.data.items.length ? (
-        <DataTable
-          columns={columns}
-          data={payments.data.items}
-          page={payments.data.page}
-          totalPages={payments.data.totalPages}
-          onPageChange={setPage}
-          getRowClassName={(payment) => payment.status === 'cancelled' ? 'opacity-55' : ''}
-        />
+        <>
+          <div className="space-y-3 md:hidden">
+            {payments.data.items.map((payment) => (
+              <Card key={payment.id} className={`p-4 ${payment.status === 'cancelled' ? 'opacity-60' : ''}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">{formatDateTime(payment.paidAt)}</p>
+                    <p className="mt-1 font-medium">{t(`user.paymentMethod.${payment.method}`)}</p>
+                  </div>
+                  <StatusBadge status={payment.status} />
+                </div>
+                <div className="mt-3 flex items-end justify-between gap-3 border-t border-border pt-3">
+                  <span className="text-xs text-muted-foreground">{t('user.receiptNumber')}: {payment.receiptNumber}</span>
+                  <span className={`text-lg font-semibold ${payment.status === 'cancelled' ? 'line-through' : ''}`}><MoneyText value={payment.amount} /></span>
+                </div>
+              </Card>
+            ))}
+          </div>
+          <div className="hidden md:block">
+            <DataTable
+              columns={columns}
+              data={payments.data.items}
+              page={payments.data.page}
+              totalPages={payments.data.totalPages}
+              onPageChange={setPage}
+              getRowClassName={(payment) => payment.status === 'cancelled' ? 'opacity-55' : ''}
+            />
+          </div>
+          <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground md:hidden">
+            <span>{t('common.page')} {payments.data.page} {t('common.of')} {Math.max(1, payments.data.totalPages)}</span>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" disabled={!payments.data.hasPrevious} onClick={() => setPage((value) => value - 1)}>{t('common.previousPage')}</Button>
+              <Button variant="outline" size="sm" disabled={!payments.data.hasNext} onClick={() => setPage((value) => value + 1)}>{t('common.nextPage')}</Button>
+            </div>
+          </div>
+        </>
       ) : <EmptyState title={t('user.emptyPaymentsTitle')} description={t('user.emptyPaymentsDescription')} badge={false} />}
     </div>
   )

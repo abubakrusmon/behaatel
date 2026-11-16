@@ -20,6 +20,7 @@ using Serilog;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.AddFilter("System.Net.Http.HttpClient.TelegramApi", LogLevel.None);
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -31,7 +32,6 @@ builder.Host.UseSerilog();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddHttpClient<TelegramService>();
 builder.Services.AddHttpContextAccessor();
 if (!builder.Services.Any(descriptor => descriptor.ServiceType == typeof(ICurrentUser)))
 {
@@ -173,8 +173,7 @@ if (builder.Environment.IsDevelopment() &&
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment() &&
-    builder.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+if (builder.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
 {
     try
     {
@@ -199,6 +198,7 @@ app.UseHttpsRedirection();
 app.UseCors("Frontend");
 app.UseRateLimiter();
 app.UseAuthentication();
+app.UseMiddleware<TelegramLinkRequiredMiddleware>();
 app.UseAuthorization();
 
 if (app.Environment.IsDevelopment() &&

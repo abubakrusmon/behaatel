@@ -1,0 +1,16 @@
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application\debug\BehaAtel.Application.csproj.AssemblyReference.cache
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application\debug\BehaAtel.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application\debug\BehaAtel.Application.AssemblyInfoInputs.cache
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application\debug\BehaAtel.Application.AssemblyInfo.cs
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application\debug\BehaAtel.Application.csproj.CoreCompileInputs.cache
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application\debug\BehaAtel.Application.sourcelink.json
+C:\Users\Asus\Desktop\ako behruz\.agent-build\bin\BehaAtel.Application\debug\BehaAtel.Application.deps.json
+C:\Users\Asus\Desktop\ako behruz\.agent-build\bin\BehaAtel.Application\debug\BehaAtel.Application.dll
+C:\Users\Asus\Desktop\ako behruz\.agent-build\bin\BehaAtel.Application\debug\BehaAtel.Application.pdb
+C:\Users\Asus\Desktop\ako behruz\.agent-build\bin\BehaAtel.Application\debug\BehaAtel.Domain.dll
+C:\Users\Asus\Desktop\ako behruz\.agent-build\bin\BehaAtel.Application\debug\BehaAtel.Domain.pdb
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application\debug\BehaAtel.B222D7BA.Up2Date
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application\debug\BehaAtel.Application.dll
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application\debug\refint\BehaAtel.Application.dll
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application\debug\BehaAtel.Application.pdb
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application\debug\ref\BehaAtel.Application.dll

@@ -148,6 +148,20 @@ public sealed class FeatureQueryTranslationTests
                 announcement.Body,
                 announcement.PublishedAt!.Value));
         AssertSql(residentAnnouncements);
+
+        var currentResidentId = Guid.NewGuid();
+        Guid? currentBuildingId = Guid.NewGuid();
+        var audienceAnnouncements = db.Announcements.AsNoTracking()
+            .Where(announcement => !announcement.IsDeleted && announcement.PublishedAt.HasValue)
+            .Where(announcement =>
+                announcement.Audience == AnnouncementAudience.AllResidents ||
+                (announcement.Audience == AnnouncementAudience.Building &&
+                 currentBuildingId != null && announcement.BuildingId == currentBuildingId) ||
+                (announcement.Audience == AnnouncementAudience.SelectedResidents &&
+                 announcement.ResidentIds.Contains(currentResidentId)))
+            .Select(announcement => announcement.Id);
+        var audienceSql = audienceAnnouncements.ToQueryString();
+        Assert.Contains("ANY", audienceSql);
     }
 
     [Fact]

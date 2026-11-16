@@ -43,7 +43,10 @@ public sealed class GetAnnouncementsHandler(IApplicationDbContext dbContext)
                 announcement.Body,
                 announcement.PublishedAt,
                 author.FullName,
-                announcement.CreatedAt);
+                announcement.CreatedAt,
+                announcement.Audience,
+                announcement.BuildingId,
+                announcement.ResidentIds);
 
         return await PagedList<AnnouncementDto>.CreateAsync(
             query,

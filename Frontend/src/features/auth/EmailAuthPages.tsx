@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { forgotPassword, register, resendVerification, resetPassword, verifyEmail } from '@/api/auth'
 import { getErrorMessage } from '@/api/errors'
 import { Logo } from '@/components/shared/Logo'
+import { DatePicker } from '@/components/shared/DatePicker'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -14,7 +15,7 @@ function AuthShell({ title, description, children }: { title: string; descriptio
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <section className="w-full max-w-lg">
-        <div className="mb-8 flex justify-center"><Logo /></div>
+        <div className="mb-8 flex justify-center"><Logo size={60} layout="vertical" /></div>
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
@@ -270,6 +271,18 @@ export function ResetPasswordPage() {
 }
 
 function FormField({ label, name, type = 'text', required = false }: { label: string; name: string; type?: string; required?: boolean }) {
+  const [date, setDate] = useState('')
+  if (type === 'date') {
+    return (
+      <label className="block text-sm font-medium">
+        {label}
+        <div className={inputClass}>
+          <DatePicker value={date} onChange={setDate} ariaLabel={label} max={new Date().toISOString().slice(0, 10)} />
+          <input type="hidden" name={name} value={date} />
+        </div>
+      </label>
+    )
+  }
   return <label className="block text-sm font-medium">{label}<Input className={inputClass} name={name} type={type} required={required} /></label>
 }
 

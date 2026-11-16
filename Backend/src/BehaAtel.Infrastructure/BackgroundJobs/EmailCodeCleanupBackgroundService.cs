@@ -18,6 +18,10 @@ public sealed class EmailCodeCleanupBackgroundService(IServiceScopeFactory scope
                 .Where(code => code.ExpiresAt < DateTime.UtcNow.AddHours(-1))
                 .ToListAsync(stoppingToken);
             db.EmailCodes.RemoveRange(expired);
+            var expiredTelegramAttempts = await db.TelegramLinkAttempts
+                .Where(attempt => attempt.ExpiresAt < DateTime.UtcNow.AddHours(-1))
+                .ToListAsync(stoppingToken);
+            db.TelegramLinkAttempts.RemoveRange(expiredTelegramAttempts);
             await db.SaveChangesAsync(stoppingToken);
         }
     }

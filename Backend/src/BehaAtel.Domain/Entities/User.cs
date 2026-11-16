@@ -31,6 +31,10 @@ public class User : BaseAuditableEntity, ISoftDelete
     public string PasswordHash { get; private set; }
     public string FullName { get; private set; }
     public string? Phone { get; private set; }
+    public string? TelegramChatId { get; private set; }
+    /// <summary>Аватар в виде data URL (уменьшенное изображение). Null — без аватара.</summary>
+    public string? AvatarData { get; private set; }
+    public bool TelegramLinkExempt { get; private set; }
     public Role Role { get; private set; }
     public bool IsActive { get; private set; }
     public bool EmailConfirmed { get; private set; } = true;
@@ -47,6 +51,7 @@ public class User : BaseAuditableEntity, ISoftDelete
     public DateTime? DeletedAt { get; private set; }
     public IReadOnlyCollection<AdminPermission> Permissions => _permissions.AsReadOnly();
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
+    public bool RequiresTelegramLink => TelegramChatId is null && !(TelegramLinkExempt && Phone is null);
 
     public static User Create(string email, string passwordHash, string fullName, Role role = Role.User, string? phone = null, bool mustChangePassword = false)
     {
@@ -62,6 +67,48 @@ public class User : BaseAuditableEntity, ISoftDelete
         }
 
         return new User(normalizedEmail, passwordHash, fullName, role, phone, mustChangePassword);
+    }
+
+    public static User CreateAdminResident(string email, string passwordHash, string fullName, string? phone)
+    {
+        var user = Create(email, passwordHash, fullName, Role.User, phone, mustChangePassword: true);
+        user.TelegramLinkExempt = string.IsNullOrWhiteSpace(phone);
+        return user;
+    }
+
+    public const int MaxAvatarLength = 150_000;
+
+    public void SetAvatar(string? dataUrl)
+    {
+        if (string.IsNullOrWhiteSpace(dataUrl))
+        {
+            AvatarData = null;
+            return;
+        }
+
+        var value = dataUrl.Trim();
+        var isImage = value.StartsWith("data:image/jpeg;base64,", StringComparison.Ordinal) ||
+                      value.StartsWith("data:image/png;base64,", StringComparison.Ordinal) ||
+                      value.StartsWith("data:image/webp;base64,", StringComparison.Ordinal);
+        if (!isImage)
+        {
+            throw new DomainException("Аватар должен быть изображением JPEG, PNG или WebP.");
+        }
+
+        if (value.Length > MaxAvatarLength)
+        {
+            throw new DomainException("Изображение слишком большое.");
+        }
+
+        AvatarData = value;
+    }
+
+    public void LinkTelegram(string chatId)
+    {
+        var normalizedChatId = Required(chatId, nameof(chatId));
+        if (TelegramChatId is not null && TelegramChatId != normalizedChatId)
+            throw new DomainException("Аккаунт уже связан с Telegram.");
+        TelegramChatId = normalizedChatId;
     }
 
     public static User CreateRegistration(

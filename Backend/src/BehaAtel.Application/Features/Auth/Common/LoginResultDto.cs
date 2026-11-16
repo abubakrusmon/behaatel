@@ -5,4 +5,5 @@ public sealed record LoginResultDto(
     AuthResponse? Session,
     Guid? ChallengeId,
     DateTime? ExpiresAt,
-    string? MaskedEmail);
+    string? MaskedEmail,
+    TelegramLinkChallengeDto? TelegramLink = null);

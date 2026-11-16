@@ -65,7 +65,10 @@ export function ChangePasswordPage() {
   return (
     <main className="grid min-h-screen place-items-center bg-background px-4 py-10">
       <div className="w-full max-w-md">
-        <div className="mb-7 flex items-center justify-between"><Logo /><Link className="rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-muted" to="/login">{t('common.logout')}</Link></div>
+        <div className="relative mb-7 flex justify-center">
+          <Logo size={60} layout="vertical" />
+          <Link className="absolute right-0 top-1/2 -translate-y-1/2 rounded-xl px-3 py-2 text-sm text-muted-foreground hover:bg-muted" to="/login">{t('common.logout')}</Link>
+        </div>
         <Card className="p-6 sm:p-8">
           <h1 className="text-2xl font-semibold tracking-tight">{t('auth.changePasswordTitle')}</h1>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">{t('auth.changePasswordDescription')}</p>

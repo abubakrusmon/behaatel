@@ -2,7 +2,6 @@ using BehaAtel.Application.Common.Exceptions;
 using BehaAtel.Application.Common.Interfaces;
 using BehaAtel.Application.Features.Residents.Common;
 using BehaAtel.Domain.Entities;
-using BehaAtel.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,8 +30,8 @@ public sealed class CreateResidentHandler(
             throw new ConflictException("Жилец с таким номером паспорта уже существует.");
         }
 
-        var residentUser = User.Create(email, passwordHasher.Hash(request.Password), request.FullName,
-            Role.User, request.Phone, mustChangePassword: true);
+        var residentUser = User.CreateAdminResident(email, passwordHasher.Hash(request.Password),
+            request.FullName, request.Phone);
         var resident = Resident.Create(residentUser.Id, passport, request.BirthDate, request.Organization);
         string? roomNumber = null;
         string? buildingName = null;

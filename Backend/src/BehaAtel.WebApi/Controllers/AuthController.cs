@@ -1,4 +1,5 @@
 using BehaAtel.Application.Features.Auth.ChangePassword;
+using BehaAtel.Application.Features.Auth.UpdateAvatar;
 using BehaAtel.Application.Features.Auth.GetCurrentUser;
 using BehaAtel.Application.Features.Auth.Login;
 using BehaAtel.Application.Features.Auth.Register;
@@ -10,6 +11,7 @@ using BehaAtel.Application.Features.Auth.VerifyLoginCode;
 using BehaAtel.Application.Features.Auth.ResendLoginCode;
 using BehaAtel.Application.Features.Auth.Logout;
 using BehaAtel.Application.Features.Auth.Refresh;
+using BehaAtel.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +21,7 @@ namespace BehaAtel.WebApi.Controllers;
 
 [ApiController]
 [Route("api/v1/auth")]
-public sealed class AuthController(IMediator mediator) : ControllerBase
+public sealed class AuthController(IMediator mediator, ITelegramAccountLinkService telegramLinkService) : ControllerBase
 {
     [AllowAnonymous]
     [EnableRateLimiting("auth-public")]
@@ -71,6 +73,14 @@ public sealed class AuthController(IMediator mediator) : ControllerBase
 
     [AllowAnonymous]
     [EnableRateLimiting("auth-public")]
+    [HttpPost("telegram-link/status")]
+    public async Task<IActionResult> TelegramLinkStatus(
+        TelegramLinkStatusRequest request,
+        CancellationToken cancellationToken) =>
+        Ok(await telegramLinkService.PollAsync(request.AttemptId, request.PollToken, cancellationToken));
+
+    [AllowAnonymous]
+    [EnableRateLimiting("auth-public")]
     [HttpPost("login/resend-code")]
     public async Task<IActionResult> ResendLoginCode(ResendLoginCodeCommand command, CancellationToken cancellationToken) =>
         Ok(await mediator.Send(command, cancellationToken));
@@ -83,6 +93,8 @@ public sealed class AuthController(IMediator mediator) : ControllerBase
         return NoContent();
     }
 
+    public sealed record TelegramLinkStatusRequest(Guid AttemptId, string PollToken);
+
     [Authorize]
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword(ChangePasswordCommand command, CancellationToken cancellationToken)
@@ -90,6 +102,11 @@ public sealed class AuthController(IMediator mediator) : ControllerBase
         await mediator.Send(command, cancellationToken);
         return NoContent();
     }
+
+    [Authorize]
+    [HttpPut("avatar")]
+    public async Task<IActionResult> UpdateAvatar(UpdateAvatarCommand command, CancellationToken cancellationToken) =>
+        Ok(await mediator.Send(command, cancellationToken));
 
     [Authorize]
     [HttpGet("me")]

@@ -6,5 +6,12 @@ export function Spinner({ label = t('common.loading') }: { label?: string }) {
 }
 
 export function FullScreenLoader() {
-  return <main className="grid min-h-screen place-items-center bg-background"><Spinner /></main>
+  return (
+    <main className="grid min-h-screen place-items-center bg-background">
+      <div className="flex flex-col items-center gap-4">
+        <img src="/brand/logo-mark.png" alt="BehaAtel" width={60} height={60} className="rounded-xl object-contain" />
+        <Spinner />
+      </div>
+    </main>
+  )
 }

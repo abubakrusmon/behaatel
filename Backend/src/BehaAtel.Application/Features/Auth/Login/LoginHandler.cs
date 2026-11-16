@@ -17,7 +17,8 @@ public sealed class LoginHandler(
     IAuditService auditService,
     IEmailCodeService codeService,
     IEmailSender emailSender,
-    IDateTimeProvider dateTimeProvider)
+    IDateTimeProvider dateTimeProvider,
+    ITelegramAccountLinkService telegramLinkService)
     : IRequestHandler<LoginCommand, LoginResultDto>
 {
     public async Task<LoginResultDto> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -59,6 +60,13 @@ public sealed class LoginHandler(
                 throw new ConflictException("Не удалось отправить код. Повторите попытку позже.");
             return new LoginResultDto(true, null, challenge.Code.Id, challenge.Code.ExpiresAt,
                 EmailCodePolicy.MaskEmail(user.Email));
+        }
+
+        if (user.RequiresTelegramLink)
+        {
+            var telegramLink = await telegramLinkService.CreateChallengeAsync(user, cancellationToken);
+            if (telegramLink is not null)
+                return new LoginResultDto(false, null, null, null, null, telegramLink);
         }
 
         return new LoginResultDto(false, await CreateSessionAsync(user, cancellationToken), null, null, null);

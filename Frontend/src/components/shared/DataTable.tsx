@@ -53,14 +53,44 @@ export function DataTable<TData extends RowData>({
   })
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card">
-      <div className="max-w-full overflow-x-auto">
+    <div className="overflow-hidden rounded-card border border-border bg-card shadow-soft">
+      <div className="divide-y divide-border md:hidden">
+        {loading ? (
+          Array.from({ length: 3 }, (_, rowIndex) => (
+            <div key={rowIndex} className="space-y-3 p-4">
+              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          ))
+        ) : table.getRowModel().rows.length ? (
+          table.getRowModel().rows.map((row) => (
+            <div key={row.id} className={`space-y-2.5 p-4 ${getRowClassName?.(row.original) ?? ''}`}>
+              {row.getVisibleCells().map((cell) => {
+                const header = cell.column.columnDef.header
+                const label = typeof header === 'string' && cell.column.id !== 'actions' ? header : null
+                return (
+                  <div key={cell.id} className="flex items-start justify-between gap-3 text-sm">
+                    {label && <span className="shrink-0 pt-0.5 text-xs text-muted-foreground">{label}</span>}
+                    <div className={label ? 'min-w-0 break-words text-right' : 'w-full min-w-0'}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ))
+        ) : (
+          <p className="px-5 py-12 text-center text-muted-foreground">{t('shared.tableEmpty')}</p>
+        )}
+      </div>
+      <div className="hidden max-w-full overflow-x-auto md:block">
         <table className="w-full min-w-[760px] text-left text-sm">
-          <thead className="border-b border-border bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
+          <thead className="sticky top-0 z-10 border-b border-border bg-muted text-xs uppercase tracking-wide text-muted-foreground">
             {table.getHeaderGroups().map((group) => (
               <tr key={group.id}>
                 {group.headers.map((header) => (
-                  <th key={header.id} className="px-5 py-3.5 font-medium">
+                  <th key={header.id} className="whitespace-nowrap px-4 py-3.5 font-medium sm:px-5">
                     {header.isPlaceholder ? null : (
                       <button
                         className="text-left"
@@ -82,7 +112,7 @@ export function DataTable<TData extends RowData>({
               Array.from({ length: 5 }, (_, rowIndex) => (
                 <tr key={rowIndex}>
                   {columns.map((_, cellIndex) => (
-                    <td key={cellIndex} className="px-5 py-4">
+                    <td key={cellIndex} className="px-4 py-4 sm:px-5">
                       <Skeleton className="h-4 w-3/4" />
                     </td>
                   ))}
@@ -92,7 +122,7 @@ export function DataTable<TData extends RowData>({
               table.getRowModel().rows.map((row) => (
                 <tr key={row.id} className={`transition-colors hover:bg-muted/50 ${getRowClassName?.(row.original) ?? ''}`}>
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-5 py-4">
+                    <td key={cell.id} className="px-4 py-4 sm:px-5">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

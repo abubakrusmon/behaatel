@@ -4,3 +4,7 @@ GET {{BehaAtel.WebApi_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+POST {{BehaAtel.WebApi_HostAddress}}/api/v1/admin/telegram/test
+Authorization: Bearer {{superAdminAccessToken}}
+Accept: application/json

@@ -14,6 +14,9 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(user => user.PasswordHash).HasMaxLength(1024).IsRequired();
         builder.Property(user => user.FullName).HasMaxLength(200).IsRequired();
         builder.Property(user => user.Phone).HasMaxLength(32);
+        builder.Property(user => user.TelegramChatId).HasMaxLength(32);
+        builder.Property(user => user.AvatarData).HasColumnType("text");
+        builder.Property(user => user.TelegramLinkExempt).HasDefaultValue(false).IsRequired();
         builder.Property(user => user.Role).HasConversion<string>().HasMaxLength(32).IsRequired();
         builder.Property(user => user.IsActive).IsRequired();
         builder.Property(user => user.EmailConfirmed).IsRequired();
@@ -28,6 +31,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(user => user.IsDeleted).IsRequired();
         builder.Property(user => user.DeletedAt).HasColumnType("timestamp with time zone");
         builder.HasIndex(user => user.Email).IsUnique().HasFilter("\"IsDeleted\" = FALSE");
+        builder.HasIndex(user => user.TelegramChatId).IsUnique().HasFilter("\"TelegramChatId\" IS NOT NULL");
 
         builder.HasMany(user => user.Permissions)
             .WithOne()

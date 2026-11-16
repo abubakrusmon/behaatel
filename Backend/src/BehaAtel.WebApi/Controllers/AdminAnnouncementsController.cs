@@ -50,10 +50,15 @@ public sealed class AdminAnnouncementsController(IMediator mediator) : Controlle
 
     [HttpPost("{id:guid}/publish")]
     [Authorize(Policy = nameof(Permission.AnnouncementsManage))]
-    public async Task<IActionResult> Publish(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Publish(
+        Guid id,
+        [FromQuery] bool sendTelegram = true,
+        CancellationToken cancellationToken = default)
     {
-        await mediator.Send(new PublishAnnouncementCommand(id), cancellationToken);
-        return NoContent();
+        var status = await mediator.Send(
+            new PublishAnnouncementCommand(id, sendTelegram),
+            cancellationToken);
+        return Ok(new { telegramStatus = status });
     }
 
     [HttpDelete("{id:guid}")]

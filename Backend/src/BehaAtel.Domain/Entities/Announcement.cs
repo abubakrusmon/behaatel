@@ -1,4 +1,5 @@
 using BehaAtel.Domain.Common;
+using BehaAtel.Domain.Enums;
 using BehaAtel.Domain.Exceptions;
 
 namespace BehaAtel.Domain.Entities;
@@ -11,7 +12,13 @@ public class Announcement : BaseAuditableEntity, ISoftDelete
         Body = string.Empty;
     }
 
-    private Announcement(string title, string body, Guid authorId)
+    private Announcement(
+        string title,
+        string body,
+        Guid authorId,
+        AnnouncementAudience audience,
+        Guid? buildingId,
+        Guid[] residentIds)
     {
         if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(body))
         {
@@ -26,17 +33,40 @@ public class Announcement : BaseAuditableEntity, ISoftDelete
         Title = title.Trim();
         Body = body.Trim();
         AuthorId = authorId;
+
+        if (audience == AnnouncementAudience.Building && (buildingId is null || buildingId == Guid.Empty))
+        {
+            throw new DomainException("Для объявления по зданию нужно указать здание.");
+        }
+
+        if (audience == AnnouncementAudience.SelectedResidents && residentIds.Length == 0)
+        {
+            throw new DomainException("Для объявления выбранным жильцам нужно указать получателей.");
+        }
+
+        Audience = audience;
+        BuildingId = audience == AnnouncementAudience.Building ? buildingId : null;
+        ResidentIds = audience == AnnouncementAudience.SelectedResidents ? residentIds : [];
     }
 
     public string Title { get; private set; }
     public string Body { get; private set; }
     public DateTime? PublishedAt { get; private set; }
     public Guid AuthorId { get; private set; }
+    public AnnouncementAudience Audience { get; private set; }
+    public Guid? BuildingId { get; private set; }
+    public Guid[] ResidentIds { get; private set; } = [];
     public bool IsDeleted { get; private set; }
     public DateTime? DeletedAt { get; private set; }
 
-    public static Announcement Create(string title, string body, Guid authorId) =>
-        new(title, body, authorId);
+    public static Announcement Create(
+        string title,
+        string body,
+        Guid authorId,
+        AnnouncementAudience audience = AnnouncementAudience.AllResidents,
+        Guid? buildingId = null,
+        IEnumerable<Guid>? residentIds = null) =>
+        new(title, body, authorId, audience, buildingId, residentIds?.Distinct().ToArray() ?? []);
 
     public void Update(string title, string body)
     {

@@ -1,4 +1,4 @@
-import { useEffect, type PropsWithChildren } from 'react'
+import { lazy, Suspense, useEffect, type PropsWithChildren } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { refresh, getMe } from '@/api/auth'
 import { queryClient } from '@/api/queryClient'
@@ -7,25 +7,32 @@ import { RequireAuth } from '@/app/guards/RequireAuth'
 import { RequirePermission } from '@/app/guards/RequirePermission'
 import { RequireRole } from '@/app/guards/RequireRole'
 import { ForbiddenPage, NotFoundPage } from '@/app/pages/AccessPages'
-import { PlaceholderPage } from '@/app/pages/PlaceholderPage'
 import { AdminLayout } from '@/app/layouts/AdminLayout'
 import { UserLayout } from '@/app/layouts/UserLayout'
 import { FullScreenLoader } from '@/components/shared/Spinner'
 import { ChangePasswordPage } from '@/features/auth/ChangePasswordPage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { ForgotPasswordPage, RegisterPage, ResetPasswordPage, VerifyEmailPage } from '@/features/auth/EmailAuthPages'
-import { HomePage } from '@/features/user/pages/HomePage'
-import { ChargesPage } from '@/features/user/pages/ChargesPage'
-import { PaymentsPage } from '@/features/user/pages/PaymentsPage'
-import { RoomPage } from '@/features/user/pages/RoomPage'
-import { AnnouncementsPage } from '@/features/user/pages/AnnouncementsPage'
-import { ProfilePage } from '@/features/user/pages/ProfilePage'
-import { RegistrationRequestsPage } from '@/features/admin/RegistrationRequestsPage'
-import { AuthSettingsPage } from '@/features/admin/AuthSettingsPage'
-import { AdminDashboardPage } from '@/features/admin/AdminDashboardPage'
-import { AdminDebtorsPage } from '@/features/admin/AdminDebtorsPage'
-import { AdminPaymentsPage } from '@/features/admin/AdminPaymentsPage'
 import { useAuthStore } from '@/store/authStore'
+
+const HomePage = lazy(() => import('@/features/user/pages/HomePage').then((module) => ({ default: module.HomePage })))
+const ChargesPage = lazy(() => import('@/features/user/pages/ChargesPage').then((module) => ({ default: module.ChargesPage })))
+const PaymentsPage = lazy(() => import('@/features/user/pages/PaymentsPage').then((module) => ({ default: module.PaymentsPage })))
+const RoomPage = lazy(() => import('@/features/user/pages/RoomPage').then((module) => ({ default: module.RoomPage })))
+const AnnouncementsPage = lazy(() => import('@/features/user/pages/AnnouncementsPage').then((module) => ({ default: module.AnnouncementsPage })))
+const ProfilePage = lazy(() => import('@/features/user/pages/ProfilePage').then((module) => ({ default: module.ProfilePage })))
+const RegistrationRequestsPage = lazy(() => import('@/features/admin/RegistrationRequestsPage').then((module) => ({ default: module.RegistrationRequestsPage })))
+const AuthSettingsPage = lazy(() => import('@/features/admin/AuthSettingsPage').then((module) => ({ default: module.AuthSettingsPage })))
+const AdminDashboardPage = lazy(() => import('@/features/admin/AdminDashboardPage').then((module) => ({ default: module.AdminDashboardPage })))
+const AdminDebtorsPage = lazy(() => import('@/features/admin/AdminDebtorsPage').then((module) => ({ default: module.AdminDebtorsPage })))
+const AdminPaymentsPage = lazy(() => import('@/features/admin/AdminPaymentsPage').then((module) => ({ default: module.AdminPaymentsPage })))
+const AdminResidentsPage = lazy(() => import('@/features/admin/AdminResidentsPage').then((module) => ({ default: module.AdminResidentsPage })))
+const AdminRoomsPage = lazy(() => import('@/features/admin/AdminRoomsPage').then((module) => ({ default: module.AdminRoomsPage })))
+const AdminAnnouncementsPage = lazy(() => import('@/features/admin/AdminAnnouncementsPage').then((module) => ({ default: module.AdminAnnouncementsPage })))
+const AdminNotificationsPage = lazy(() => import('@/features/admin/AdminNotificationsPage').then((module) => ({ default: module.AdminNotificationsPage })))
+const AdminChargesPage = lazy(() => import('@/features/admin/AdminChargesPage').then((module) => ({ default: module.AdminChargesPage })))
+const AdminAdminsPage = lazy(() => import('@/features/admin/AdminAdminsPage').then((module) => ({ default: module.AdminAdminsPage })))
+const AdminAuditPage = lazy(() => import('@/features/admin/AdminAuditPage').then((module) => ({ default: module.AdminAuditPage })))
 
 function AuthBootstrap({ children }: PropsWithChildren) {
   const status = useAuthStore((state) => state.status)
@@ -77,6 +84,7 @@ export function App() {
     <Providers>
       <BrowserRouter>
         <AuthBootstrap>
+          <Suspense fallback={<FullScreenLoader />}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -94,25 +102,26 @@ export function App() {
                     <Route index element={<AdminDashboardPage />} />
                   </Route>
                   <Route element={<RequirePermission permission="residentsView" />}>
-                    <Route path="residents" element={<PlaceholderPage />} />
+                    <Route path="residents" element={<AdminResidentsPage />} />
                     <Route path="registrations" element={<RegistrationRequestsPage />} />
                   </Route>
                   <Route element={<RequirePermission permission="roomsView" />}>
-                    <Route path="rooms" element={<PlaceholderPage />} />
+                    <Route path="rooms" element={<AdminRoomsPage />} />
                   </Route>
                   <Route element={<RequirePermission permission="chargesView" />}>
-                    <Route path="charges" element={<PlaceholderPage />} />
+                    <Route path="charges" element={<AdminChargesPage />} />
                   </Route>
                   <Route element={<RequirePermission permission="paymentsView" />}>
                     <Route path="payments" element={<AdminPaymentsPage />} />
                     <Route path="debtors" element={<AdminDebtorsPage />} />
                   </Route>
                   <Route element={<RequirePermission permission="announcementsManage" />}>
-                    <Route path="announcements" element={<PlaceholderPage />} />
+                    <Route path="announcements" element={<AdminAnnouncementsPage />} />
+                    <Route path="notifications" element={<AdminNotificationsPage />} />
                   </Route>
                   <Route element={<RequireRole roles={['superAdmin']} />}>
-                    <Route path="admins" element={<PlaceholderPage />} />
-                    <Route path="audit" element={<PlaceholderPage />} />
+                    <Route path="admins" element={<AdminAdminsPage />} />
+                    <Route path="audit" element={<AdminAuditPage />} />
                     <Route path="settings" element={<AuthSettingsPage />} />
                   </Route>
                 </Route>
@@ -129,6 +138,7 @@ export function App() {
               </Route>
             </Route>
           </Routes>
+          </Suspense>
         </AuthBootstrap>
       </BrowserRouter>
     </Providers>

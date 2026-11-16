@@ -42,6 +42,7 @@ public sealed class SmtpEmailSender(
             message.To.Add(to);
             using var client = new SmtpClient(host, port)
             {
+                Timeout = 15_000,
                 EnableSsl = section.GetValue("EnableSsl", true),
                 Credentials = new NetworkCredential(section["User"], password)
             };

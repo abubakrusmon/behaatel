@@ -4,6 +4,7 @@ import type { SortingState } from '@tanstack/table-core'
 import { useSearchParams } from 'react-router-dom'
 import { useAdminDebtors } from '@/api/admin/hooks'
 import { DataTable } from '@/components/shared/DataTable'
+import { FilterBar } from '@/components/shared/FilterBar'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { MoneyText } from '@/components/shared/MoneyText'
@@ -62,6 +63,10 @@ export function AdminDebtorsPage() {
       if (key !== 'page') next.delete('page')
       return next
     }, { replace: true })
+  }
+  const clearFilters = () => {
+    setSearchDraft('')
+    setSearchParams(new URLSearchParams(), { replace: true })
   }
 
   const columns: ColumnDef<DebtorDto, unknown>[] = [
@@ -123,10 +128,11 @@ export function AdminDebtorsPage() {
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-7">
       <PageHeader title={t('pages.debtors.title')} description={t('pages.debtors.description')} />
-      <label className="grid max-w-md gap-1.5 text-sm font-medium">
-        {t('adminFinance.searchDebtor')}
-        <Input value={searchDraft} placeholder={t('user.fullName')} onChange={(event) => setSearchDraft(event.target.value)} />
-      </label>
+      <FilterBar onReset={clearFilters}>
+        <label className="grid gap-1.5 text-sm font-medium sm:col-span-2">{t('adminFinance.searchDebtor')}
+          <Input value={searchDraft} placeholder={t('user.fullName')} onChange={(event) => setSearchDraft(event.target.value)} />
+        </label>
+      </FilterBar>
       {debtors.isPending ? (
         <div className="h-96 animate-pulse rounded-2xl bg-muted" aria-label={t('common.loading')} />
       ) : debtors.isError ? (

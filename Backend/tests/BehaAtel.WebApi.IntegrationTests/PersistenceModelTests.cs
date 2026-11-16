@@ -26,6 +26,11 @@ public sealed class PersistenceModelTests
         Assert.NotEmpty(model.FindEntityType(typeof(Building))!.GetDeclaredQueryFilters());
         Assert.NotEmpty(model.FindEntityType(typeof(Room))!.GetDeclaredQueryFilters());
         Assert.NotEmpty(model.FindEntityType(typeof(Announcement))!.GetDeclaredQueryFilters());
+        var userEntity = model.FindEntityType(typeof(User))!;
+        var telegramChatIndex = Assert.Single(userEntity.GetIndexes()
+            .Where(index => index.Properties.SingleOrDefault()?.Name == nameof(User.TelegramChatId)));
+        Assert.True(telegramChatIndex.IsUnique);
+        Assert.NotNull(model.FindEntityType(typeof(TelegramLinkAttempt)));
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using BehaAtel.Application.Features.Announcements.CreateAnnouncement;
 using FluentAssertions;
 
@@ -13,6 +14,16 @@ public class CreateAnnouncementValidatorTests
         var result = _validator.Validate(new CreateAnnouncementCommand("Объявление", "Текст объявления", true));
 
         result.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Deserialize_CommandWithoutTelegramOption_DefaultsToSending()
+    {
+        var command = JsonSerializer.Deserialize<CreateAnnouncementCommand>(
+            """{"title":"Объявление","body":"Текст","publishNow":true}""");
+
+        command.Should().NotBeNull();
+        command!.SendTelegram.Should().BeTrue();
     }
 
     [Theory]

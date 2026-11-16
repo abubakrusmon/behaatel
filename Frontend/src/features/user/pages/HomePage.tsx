@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { differenceInCalendarDays, parseISO, startOfDay } from 'date-fns'
-import { CalendarClock, CircleDollarSign, CreditCard, Wallet } from 'lucide-react'
+import { ArrowUpRight, CalendarClock, CircleDollarSign, CreditCard, House, Megaphone, UserRound, Wallet } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import {
   Bar,
   BarChart,
@@ -13,7 +14,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { useMyAnnouncements, useMyCharges, useMyMonthlyChart, useMyPayments, useMySummary } from '@/api/meHooks'
+import { useMyAnnouncements, useMyCharges, useMyMonthlyChart, useMyPayments, useMyRoom, useMySummary } from '@/api/meHooks'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { MoneyText } from '@/components/shared/MoneyText'
@@ -38,11 +39,12 @@ export function HomePage() {
   const { user } = useAuth()
   const [months, setMonths] = useState(6)
   const summary = useMySummary()
+  const room = useMyRoom()
   const monthly = useMyMonthlyChart(months)
   const recentCharges = useMyCharges({ page: 1, pageSize: 100 })
   const payments = useMyPayments({ page: 1, pageSize: 5 })
   const announcements = useMyAnnouncements({ page: 1, pageSize: 3 })
-  const queries = [summary, monthly, recentCharges, payments, announcements]
+  const queries = [summary, room, monthly, recentCharges, payments, announcements]
   const failure = queries.find((query) => query.isError)
   const typeTotals = useMemo(() => {
     const cutoff = new Date()
@@ -57,7 +59,7 @@ export function HomePage() {
 
   if (failure) return <div className="mx-auto max-w-7xl p-4 sm:p-7"><ErrorState onRetry={() => void failure.refetch()} /></div>
   if (queries.some((query) => query.isPending)) return <PageLoading />
-  if (!summary.data || !monthly.data || !recentCharges.data || !payments.data || !announcements.data) return <PageLoading />
+  if (!summary.data || room.data === undefined || !monthly.data || !recentCharges.data || !payments.data || !announcements.data) return <PageLoading />
 
   const today = startOfDay(new Date())
   const daysToDue = summary.data.nextDueDate
@@ -83,7 +85,36 @@ export function HomePage() {
         description={t('user.homeDescription')}
       />
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label={t('pages.home.title')}>
+      <section className={`overflow-hidden rounded-card bg-gradient-to-br p-5 text-white shadow-soft sm:p-7 xl:hidden ${summary.data.totalDebt > 0 ? 'from-indigo-700 via-indigo-700 to-violet-800' : 'from-emerald-700 via-teal-700 to-cyan-800'}`}>
+        <p className="text-sm font-medium text-white/75">{summary.data.totalDebt > 0 ? t('user.totalDebt') : t('user.balance')}</p>
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+          <p className="text-3xl font-semibold tracking-tight"><MoneyText value={summary.data.totalDebt > 0 ? summary.data.totalDebt : summary.data.balance} /></p>
+          <Link to="/app/charges" className="inline-flex h-11 items-center gap-2 rounded-control bg-white/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-white/25 focus-visible:outline-white">
+            {t('user.goToCharges')}<ArrowUpRight size={17} aria-hidden="true" />
+          </Link>
+        </div>
+        <div className="mt-5 border-t border-white/20 pt-4 text-sm text-white/85">
+          {daysToDue === null || summary.data.totalDebt <= 0
+            ? t('user.noDebt')
+            : `${t('user.nextDueDate')}: ${formatDate(summary.data.nextDueDate)} · ${overdue ? t('user.overdueDays').replace('{days}', String(Math.abs(daysToDue))) : daysToDue === 0 ? t('user.dueToday') : t('user.daysUntilDue').replace('{days}', String(daysToDue))}`}
+        </div>
+      </section>
+
+      <section className="grid grid-cols-4 gap-2.5 xl:hidden" aria-label={t('user.quickActions')}>
+        {[
+          { to: '/app/payments', label: 'nav.payments', icon: CreditCard },
+          { to: '/app/room', label: 'nav.myRoom', icon: House },
+          { to: '/app/announcements', label: 'nav.announcements', icon: Megaphone },
+          { to: '/app/profile', label: 'nav.profile', icon: UserRound },
+        ].map(({ to, label, icon: Icon }) => (
+          <Link key={to} to={to} className="flex min-w-0 flex-col items-center gap-2 rounded-card border border-border bg-card p-3 text-center text-xs font-medium text-foreground shadow-soft transition-colors hover:bg-muted">
+            <span className="grid size-10 place-items-center rounded-xl bg-accent text-primary"><Icon size={19} aria-hidden="true" /></span>
+            <span className="truncate">{t(label as Parameters<typeof t>[0])}</span>
+          </Link>
+        ))}
+      </section>
+
+      <section className="hidden gap-4 xl:grid xl:grid-cols-4" aria-label={t('pages.home.title')}>
         <StatCard icon={Wallet} label={t('user.dueThisMonth')} value={formatMoney(summary.data.dueThisMonth)} numericValue={summary.data.dueThisMonth} formatValue={formatMoney} />
         <StatCard
           icon={CircleDollarSign}
@@ -105,6 +136,29 @@ export function HomePage() {
         />
       </section>
 
+      <section className="grid gap-4 sm:grid-cols-2 xl:hidden">
+        <Link to="/app/room" className="group min-w-0">
+          <Card className="h-full p-4 transition-transform group-hover:-translate-y-0.5 sm:p-5">
+            <div className="flex items-center gap-3">
+              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent text-primary"><House size={20} aria-hidden="true" /></span>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">{t('user.myRoomCard')}</p>
+                <p className="mt-1 truncate font-semibold">{room.data ? `${room.data.buildingName} · ${room.data.roomNumber}` : t('user.roomNotAssignedTitle')}</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+        <Link to="/app/charges" className="group min-w-0">
+          <Card className="h-full p-4 transition-transform group-hover:-translate-y-0.5 sm:p-5">
+            <p className="text-xs text-muted-foreground">{t('user.nextPayment')}</p>
+            <div className="mt-2 flex items-center justify-between gap-3">
+              <p className="truncate font-semibold">{daysToDue === null || summary.data.totalDebt <= 0 ? t('user.noDebt') : formatDate(summary.data.nextDueDate)}</p>
+              {summary.data.totalDebt > 0 && <MoneyText value={summary.data.dueThisMonth} />}
+            </div>
+          </Card>
+        </Link>
+      </section>
+
       <section className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(280px,1fr)]">
         <Card className="min-w-0 p-4 sm:p-6">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -121,7 +175,7 @@ export function HomePage() {
           </div>
           <p className="sr-only">{t('user.chartDescription').replace('{summary}', chartSummary || t('user.noChartData'))}</p>
           {hasMonthlyData ? (
-            <div className="h-72 w-full min-w-0" role="img" aria-label={t('user.chargedAndPaid')}>
+            <div className="h-56 w-full min-w-0 sm:h-72" role="img" aria-label={t('user.chargedAndPaid')}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 8, right: 4, left: -16, bottom: 4 }}>
                   <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />

@@ -1,3 +1,6 @@
+using BehaAtel.Application.Common.Interfaces;
+using BehaAtel.Domain.Enums;
+
 namespace BehaAtel.Application.Features.Announcements.Common;
 
 public sealed record AnnouncementDto(
@@ -6,4 +9,8 @@ public sealed record AnnouncementDto(
     string Body,
     DateTime? PublishedAt,
     string AuthorName,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    AnnouncementAudience AudienceKind = AnnouncementAudience.AllResidents,
+    Guid? BuildingId = null,
+    Guid[]? ResidentIds = null,
+    TelegramQueueStatus? TelegramStatus = null);

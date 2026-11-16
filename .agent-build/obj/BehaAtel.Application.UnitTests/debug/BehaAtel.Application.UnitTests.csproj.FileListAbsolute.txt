@@ -1,0 +1,8 @@
+C:\Users\Asus\Desktop\ako behruz\.agent-build\bin\BehaAtel.Application.UnitTests\debug\.msCoverageSourceRootsMapping_BehaAtel.Application.UnitTests
+C:\Users\Asus\Desktop\ako behruz\.agent-build\bin\BehaAtel.Application.UnitTests\debug\CoverletSourceRootsMapping_BehaAtel.Application.UnitTests
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application.UnitTests\debug\BehaAtel.Application.UnitTests.csproj.AssemblyReference.cache
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application.UnitTests\debug\BehaAtel.Application.UnitTests.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application.UnitTests\debug\BehaAtel.Application.UnitTests.AssemblyInfoInputs.cache
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application.UnitTests\debug\BehaAtel.Application.UnitTests.AssemblyInfo.cs
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application.UnitTests\debug\BehaAtel.Application.UnitTests.csproj.CoreCompileInputs.cache
+C:\Users\Asus\Desktop\ako behruz\.agent-build\obj\BehaAtel.Application.UnitTests\debug\BehaAtel.Application.UnitTests.sourcelink.json

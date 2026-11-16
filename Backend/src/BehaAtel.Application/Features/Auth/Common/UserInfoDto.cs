@@ -9,12 +9,14 @@ public sealed record UserInfoDto(
     string FullName,
     Role Role,
     Permission[] Permissions,
-    bool MustChangePassword)
+    bool MustChangePassword,
+    string? AvatarUrl = null)
 {
     public static UserInfoDto FromUser(User user) =>
         new(user.Id, user.Email, user.FullName, user.Role,
             user.Role == Role.SuperAdmin
                 ? Enum.GetValues<Permission>()
                 : user.Permissions.Select(permission => permission.Permission).ToArray(),
-            user.MustChangePassword);
+            user.MustChangePassword,
+            user.AvatarData);
 }
